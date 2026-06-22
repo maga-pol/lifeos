@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS - Productivity Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">L</div>
+        <div>
+          <strong>LifeOS</strong>
+          <span>Personal command center</span>
+        </div>
+      </div>
+
+      <nav class="nav-list" aria-label="Main navigation">
+        <button class="nav-item active" data-page="dashboard">Dashboard</button>
+        <button class="nav-item" data-page="habits">Habits</button>
+        <button class="nav-item" data-page="sleep">Sleep</button>
+        <button class="nav-item" data-page="notes">Notes</button>
+        <button class="nav-item" data-page="goals">Goals</button>
+        <button class="nav-item" data-page="planner">Planner</button>
+        <button class="nav-item" data-page="analytics">Analytics</button>
+        <button class="nav-item" data-page="settings">Settings</button>
+      </nav>
+
+      <div class="sidebar-card">
+        <span class="eyebrow">Today</span>
+        <strong id="sidebarScore">84%</strong>
+        <p>Productivity score</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Monday, June 22</p>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="top-actions">
+          <label class="search-wrap">
+            <span>Search</span>
+            <input id="globalSearch" type="search" placeholder="Notes, goals, tasks..." />
+          </label>
+          <button class="icon-button" id="themeToggle" aria-label="Toggle theme">☾</button>
+          <button class="primary-button" data-open-modal="habit">New Habit</button>
+        </div>
+      </header>
+
+      <section class="page active" id="dashboard">
+        <div class="dashboard-grid">
+          <article class="panel hero-panel">
+            <div>
+              <span class="eyebrow">Daily Focus</span>
+              <h2>Build a calmer, more intentional day.</h2>
+              <p>Your habits, goals, sleep, notes, and plan are synced into one focused workspace.</p>
+            </div>
+            <div class="focus-ring">
+              <svg viewBox="0 0 120 120" role="img" aria-label="Productivity score 84 percent">
+                <circle cx="60" cy="60" r="50"></circle>
+                <circle cx="60" cy="60" r="50" class="progress-circle"></circle>
+              </svg>
+              <strong>84%</strong>
+              <span>Score</span>
+            </div>
+          </article>
+
+          <article class="panel stat-card">
+            <span class="eyebrow">Sleep</span>
+            <strong id="sleepSummary">7h 35m</strong>
+            <p>Last night · quality 8/10</p>
+          </article>
+
+          <article class="panel stat-card">
+            <span class="eyebrow">Habits</span>
+            <strong id="habitSummary">3 / 5</strong>
+            <p>Completed today</p>
+          </article>
+
+          <article class="panel stat-card">
+            <span class="eyebrow">Tasks</span>
+            <strong id="taskSummary">4</strong>
+            <p>Due today</p>
+          </article>
+        </div>
+
+        <div class="two-column">
+          <article class="panel">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">Today</span>
+                <h3>Habit checklist</h3>
+              </div>
+              <button class="text-button" data-page-link="habits">View all</button>
+            </div>
+            <div class="habit-list" id="dashboardHabits"></div>
+          </article>
+
+          <article class="panel">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">This week</span>
+                <h3>Statistics</h3>
+              </div>
+            </div>
+            <div class="bar-chart" id="weeklyChart"></div>
+          </article>
+        </div>
+
+        <div class="three-column">
+          <article class="panel">
+            <div class="section-head">
+              <h3>Goals progress</h3>
+              <button class="text-button" data-page-link="goals">Open</button>
+            </div>
+            <div id="dashboardGoals"></div>
+          </article>
+          <article class="panel">
+            <div class="section-head">
+              <h3>Tasks for today</h3>
+              <button class="text-button" data-page-link="planner">Plan</button>
+            </div>
+            <div id="dashboardTasks"></div>
+          </article>
+          <article class="panel">
+            <div class="section-head">
+              <h3>Recent notes</h3>
+              <button class="text-button" data-page-link="notes">Notes</button>
+            </div>
+            <div id="dashboardNotes"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="habits">
+        <div class="section-toolbar">
+          <div>
+            <span class="eyebrow">Tracker</span>
+            <h2>Habits</h2>
+          </div>
+          <button class="primary-button" data-open-modal="habit">Create habit</button>
+        </div>
+        <div class="two-column">
+          <article class="panel">
+            <h3>Daily habits</h3>
+            <div class="habit-list large" id="habitManager"></div>
+          </article>
+          <article class="panel">
+            <h3>History calendar</h3>
+            <div class="heatmap" id="habitHeatmap"></div>
+            <div class="mini-stats">
+              <span>Daily 68%</span>
+              <span>Weekly 74%</span>
+              <span>Monthly 81%</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="sleep">
+        <div class="section-toolbar">
+          <div>
+            <span class="eyebrow">Recovery</span>
+            <h2>Sleep Tracker</h2>
+          </div>
+        </div>
+        <div class="two-column">
+          <form class="panel form-panel" id="sleepForm">
+            <h3>Add sleep entry</h3>
+            <label>Bedtime <input type="time" id="bedtime" value="23:15" /></label>
+            <label>Wake-up time <input type="time" id="wakeup" value="06:50" /></label>
+            <label>Quality <input type="range" id="sleepQuality" min="1" max="10" value="8" /></label>
+            <button class="primary-button" type="submit">Calculate sleep</button>
+            <div class="result-card" id="sleepResult">7h 35m total sleep</div>
+          </form>
+          <article class="panel">
+            <h3>Sleep analytics</h3>
+            <div class="line-chart" id="sleepChart"></div>
+            <div class="mini-stats">
+              <span>Weekly avg 7h 24m</span>
+              <span>Monthly avg 7h 12m</span>
+              <span>Consistency 86%</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="notes">
+        <div class="section-toolbar">
+          <div>
+            <span class="eyebrow">Knowledge</span>
+            <h2>Notes</h2>
+          </div>
+          <button class="primary-button" data-open-modal="note">New note</button>
+        </div>
+        <div class="cards-grid" id="notesGrid"></div>
+      </section>
+
+      <section class="page" id="goals">
+        <div class="section-toolbar">
+          <div>
+            <span class="eyebrow">Long term</span>
+            <h2>Goals</h2>
+          </div>
+          <button class="primary-button" data-open-modal="goal">New goal</button>
+        </div>
+        <div class="cards-grid" id="goalsGrid"></div>
+      </section>
+
+      <section class="page" id="planner">
+        <div class="section-toolbar">
+          <div>
+            <span class="eyebrow">Plan</span>
+            <h2>Planner</h2>
+          </div>
+          <button class="primary-button" data-open-modal="task">New task</button>
+        </div>
+        <div class="planner-layout">
+          <article class="panel">
+            <h3>Today</h3>
+            <div id="plannerTasks"></div>
+          </article>
+          <article class="panel calendar-panel">
+            <h3>Week view</h3>
+            <div class="week-grid" id="weekGrid"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="analytics">
+        <div class="section-toolbar">
+          <div>
+            <span class="eyebrow">Insights</span>
+            <h2>Analytics</h2>
+          </div>
+        </div>
+        <div class="analytics-grid">
+          <article class="panel">
+            <h3>Habit completion trends</h3>
+            <div class="bar-chart tall" id="analyticsHabits"></div>
+          </article>
+          <article class="panel">
+            <h3>Sleep trends</h3>
+            <div class="line-chart tall" id="analyticsSleep"></div>
+          </article>
+          <article class="panel">
+            <h3>Goal progress</h3>
+            <div id="analyticsGoals"></div>
+          </article>
+          <article class="panel">
+            <h3>Productivity statistics</h3>
+            <div class="metric-grid">
+              <div><strong>88%</strong><span>Task rate</span></div>
+              <div><strong>12</strong><span>Streak days</span></div>
+              <div><strong>31h</strong><span>Deep work</span></div>
+              <div><strong>4.8</strong><span>Focus avg</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="settings">
+        <div class="section-toolbar">
+          <div>
+            <span class="eyebrow">Account</span>
+            <h2>Profile & Settings</h2>
+          </div>
+        </div>
+        <div class="two-column">
+          <article class="panel form-panel">
+            <h3>Profile</h3>
+            <label>Name <input type="text" value="Maga" /></label>
+            <label>Email <input type="email" value="maga@example.com" /></label>
+            <button class="primary-button">Save profile</button>
+          </article>
+          <article class="panel">
+            <h3>Supabase setup</h3>
+            <p class="muted">Authentication and database are ready to connect. Add your Supabase URL and anon key in <code>script.js</code>, then create tables for profiles, habits, sleep entries, notes, goals, milestones, tasks, and events.</p>
+            <button class="secondary-button" id="backupButton">Export demo data</button>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="mobile-nav">
+    <button class="nav-item active" data-page="dashboard">Home</button>
+    <button class="nav-item" data-page="habits">Habits</button>
+    <button class="nav-item" data-page="planner">Plan</button>
+    <button class="nav-item" data-page="analytics">Stats</button>
+  </div>
+
+  <dialog class="modal" id="modal">
+    <form method="dialog" class="modal-card" id="modalForm">
+      <button class="close-button" type="button" id="modalClose" aria-label="Close">×</button>
+      <h3 id="modalTitle">Create</h3>
+      <div id="modalFields"></div>
+      <button class="primary-button" id="modalSave" value="default">Save</button>
+    </form>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
