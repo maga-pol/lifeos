@@ -6,10 +6,35 @@
   <title>LifeOS - Productivity Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <section class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="brand auth-brand">
+        <div class="brand-mark">L</div>
+        <div>
+          <strong>LifeOS</strong>
+          <span>Personal command center</span>
+        </div>
+      </div>
+      <div>
+        <span class="eyebrow">Authorization</span>
+        <h1>Sign in to your workspace</h1>
+        <p class="muted">Create a local demo account or sign in with saved credentials.</p>
+      </div>
+      <form class="auth-form" id="authForm">
+        <label>Name <input type="text" id="authName" placeholder="Maga" autocomplete="name" /></label>
+        <label>Email <input type="email" id="authEmail" placeholder="maga@example.com" autocomplete="email" required /></label>
+        <label>Password <input type="password" id="authPassword" placeholder="Minimum 6 characters" autocomplete="current-password" required /></label>
+        <p class="auth-message" id="authMessage"></p>
+        <button class="primary-button" type="submit" id="authSubmit">Sign in</button>
+      </form>
+      <button class="text-button auth-switch" type="button" id="authModeToggle">Create new account</button>
+    </div>
+  </section>
+
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand">
@@ -24,6 +49,7 @@
         <button class="nav-item active" data-page="dashboard">Dashboard</button>
         <button class="nav-item" data-page="habits">Habits</button>
         <button class="nav-item" data-page="sleep">Sleep</button>
+        <button class="nav-item" data-page="screen-time">Screen Time</button>
         <button class="nav-item" data-page="notes">Notes</button>
         <button class="nav-item" data-page="goals">Goals</button>
         <button class="nav-item" data-page="planner">Planner</button>
@@ -50,6 +76,7 @@
             <input id="globalSearch" type="search" placeholder="Notes, goals, tasks..." />
           </label>
           <button class="icon-button" id="themeToggle" aria-label="Toggle theme">☾</button>
+          <button class="secondary-button" id="logoutButton">Logout</button>
           <button class="primary-button" data-open-modal="habit">New Habit</button>
         </div>
       </header>
@@ -192,6 +219,51 @@
         </div>
       </section>
 
+      <section class="page" id="screen-time">
+        <div class="section-toolbar">
+          <div>
+            <span class="eyebrow">Digital balance</span>
+            <h2>Screen Time</h2>
+          </div>
+        </div>
+        <div class="screen-grid">
+          <form class="panel form-panel" id="screenTimeForm">
+            <h3>Add app usage</h3>
+            <label>App name <input type="text" id="screenApp" value="Instagram" /></label>
+            <label>Minutes today <input type="number" id="screenMinutes" min="0" max="1440" value="45" /></label>
+            <label>Category
+              <select id="screenCategory">
+                <option>Social</option>
+                <option>Study</option>
+                <option>Work</option>
+                <option>Entertainment</option>
+                <option>Wellness</option>
+              </select>
+            </label>
+            <button class="primary-button" type="submit">Add usage</button>
+          </form>
+          <article class="panel">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">Today</span>
+                <h3>Total screen time</h3>
+              </div>
+              <strong class="big-number" id="screenTotal">0h 00m</strong>
+            </div>
+            <div class="screen-bars" id="screenBars"></div>
+          </article>
+          <article class="panel">
+            <h3>Focus limits</h3>
+            <div class="metric-grid">
+              <div><strong id="productiveTime">0h</strong><span>Productive</span></div>
+              <div><strong id="distractionTime">0h</strong><span>Distracting</span></div>
+              <div><strong>2h</strong><span>Social limit</span></div>
+              <div><strong>9 PM</strong><span>Wind down</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section class="page" id="notes">
         <div class="section-toolbar">
           <div>
@@ -276,9 +348,9 @@
         <div class="two-column">
           <article class="panel form-panel">
             <h3>Profile</h3>
-            <label>Name <input type="text" value="Maga" /></label>
-            <label>Email <input type="email" value="maga@example.com" /></label>
-            <button class="primary-button">Save profile</button>
+            <label>Name <input type="text" id="profileName" value="Maga" /></label>
+            <label>Email <input type="email" id="profileEmail" value="maga@example.com" /></label>
+            <button class="primary-button" id="saveProfileButton" type="button">Save profile</button>
           </article>
           <article class="panel">
             <h3>Supabase setup</h3>
@@ -293,8 +365,8 @@
   <div class="mobile-nav">
     <button class="nav-item active" data-page="dashboard">Home</button>
     <button class="nav-item" data-page="habits">Habits</button>
+    <button class="nav-item" data-page="screen-time">Screen</button>
     <button class="nav-item" data-page="planner">Plan</button>
-    <button class="nav-item" data-page="analytics">Stats</button>
   </div>
 
   <dialog class="modal" id="modal">

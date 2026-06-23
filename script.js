@@ -4,6 +4,7 @@ const supabaseConfig = {
 };
 
 const state = {
+  user: null,
   habits: [
     { id: 1, title: "Read 20 minutes", category: "Growth", done: true, streak: 12, completion: 86 },
     { id: 2, title: "Exercise", category: "Health", done: true, streak: 7, completion: 74 },
@@ -27,6 +28,17 @@ const state = {
     { id: 3, title: "Workout 30 minutes", priority: "High", done: false, due: "Today" },
     { id: 4, title: "Plan weekly goals", priority: "Low", done: false, due: "Today" },
   ],
+  screenTime: [
+    { id: 1, app: "Instagram", category: "Social", minutes: 75 },
+    { id: 2, app: "Duolingo", category: "Study", minutes: 28 },
+    { id: 3, app: "YouTube", category: "Entertainment", minutes: 52 },
+    { id: 4, app: "Notion", category: "Work", minutes: 41 },
+  ],
+};
+
+const storageKeys = {
+  accounts: "lifeosAccounts",
+  session: "lifeosSession",
 };
 
 const pages = document.querySelectorAll(".page");
@@ -35,16 +47,114 @@ const pageTitle = document.getElementById("pageTitle");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const modalFields = document.getElementById("modalFields");
+const authScreen = document.getElementById("authScreen");
+const authForm = document.getElementById("authForm");
+const authModeToggle = document.getElementById("authModeToggle");
+const authMessage = document.getElementById("authMessage");
+const authSubmit = document.getElementById("authSubmit");
+const authName = document.getElementById("authName");
+const authEmail = document.getElementById("authEmail");
+const authPassword = document.getElementById("authPassword");
+const profileName = document.getElementById("profileName");
+const profileEmail = document.getElementById("profileEmail");
+let authMode = "signin";
 
 const chartValues = [62, 78, 71, 86, 73, 91, 84];
 const sleepValues = [7.1, 6.8, 7.4, 8.0, 7.2, 7.8, 7.6];
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const pageLabels = {
+  dashboard: "Dashboard",
+  habits: "Habits",
+  sleep: "Sleep",
+  "screen-time": "Screen Time",
+  notes: "Notes",
+  goals: "Goals",
+  planner: "Planner",
+  analytics: "Analytics",
+  settings: "Settings",
+};
 
 function showPage(pageId) {
   pages.forEach((page) => page.classList.toggle("active", page.id === pageId));
   navItems.forEach((item) => item.classList.toggle("active", item.dataset.page === pageId));
-  pageTitle.textContent = pageId.charAt(0).toUpperCase() + pageId.slice(1);
+  pageTitle.textContent = pageLabels[pageId] || pageId;
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function getAccounts() {
+  return JSON.parse(localStorage.getItem(storageKeys.accounts) || "[]");
+}
+
+function saveAccounts(accounts) {
+  localStorage.setItem(storageKeys.accounts, JSON.stringify(accounts));
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  const isSignup = authMode === "signup";
+  authName.parentElement.style.display = isSignup ? "grid" : "none";
+  authName.required = isSignup;
+  authSubmit.textContent = isSignup ? "Create account" : "Sign in";
+  authModeToggle.textContent = isSignup ? "I already have an account" : "Create new account";
+  authMessage.textContent = "";
+}
+
+function syncProfileFields() {
+  if (!state.user) return;
+  profileName.value = state.user.name;
+  profileEmail.value = state.user.email;
+}
+
+function startSession(user) {
+  state.user = { name: user.name, email: user.email };
+  localStorage.setItem(storageKeys.session, JSON.stringify(state.user));
+  authScreen.classList.add("hidden");
+  syncProfileFields();
+}
+
+function handleAuth(event) {
+  event.preventDefault();
+  const email = authEmail.value.trim().toLowerCase();
+  const password = authPassword.value;
+  const accounts = getAccounts();
+
+  if (password.length < 6) {
+    authMessage.textContent = "Password must be at least 6 characters.";
+    return;
+  }
+
+  if (authMode === "signup") {
+    if (accounts.some((account) => account.email === email)) {
+      authMessage.textContent = "Account with this email already exists.";
+      return;
+    }
+    const user = { name: authName.value.trim() || "LifeOS user", email, password };
+    accounts.push(user);
+    saveAccounts(accounts);
+    startSession(user);
+    authForm.reset();
+    return;
+  }
+
+  const user = accounts.find((account) => account.email === email && account.password === password);
+  if (!user) {
+    authMessage.textContent = "Check your email and password, or create an account.";
+    return;
+  }
+  startSession(user);
+  authForm.reset();
+}
+
+function restoreSession() {
+  const session = JSON.parse(localStorage.getItem(storageKeys.session) || "null");
+  if (session) {
+    state.user = session;
+    authScreen.classList.add("hidden");
+    syncProfileFields();
+  } else {
+    authScreen.classList.remove("hidden");
+    setAuthMode("signin");
+  }
 }
 
 function renderHabits() {
@@ -154,6 +264,36 @@ function renderTasks() {
       renderAll();
     });
   });
+}
+
+function formatMinutes(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours}h ${String(mins).padStart(2, "0")}m`;
+}
+
+function renderScreenTime() {
+  const total = state.screenTime.reduce((sum, item) => sum + item.minutes, 0);
+  const productive = state.screenTime
+    .filter((item) => ["Study", "Work", "Wellness"].includes(item.category))
+    .reduce((sum, item) => sum + item.minutes, 0);
+  const distracting = total - productive;
+
+  document.getElementById("screenTotal").textContent = formatMinutes(total);
+  document.getElementById("productiveTime").textContent = formatMinutes(productive);
+  document.getElementById("distractionTime").textContent = formatMinutes(distracting);
+  document.getElementById("screenBars").innerHTML = state.screenTime.map((item) => {
+    const width = total ? Math.max(6, Math.round((item.minutes / total) * 100)) : 0;
+    return `
+      <div class="screen-row">
+        <div class="screen-row-head">
+          <strong>${item.app}</strong>
+          <span>${item.category} · ${formatMinutes(item.minutes)}</span>
+        </div>
+        <div class="screen-track"><span style="width: ${width}%"></span></div>
+      </div>
+    `;
+  }).join("");
 }
 
 function taskRow(task) {
@@ -280,6 +420,7 @@ function renderAll() {
   renderGoals();
   renderNotes();
   renderTasks();
+  renderScreenTime();
   renderCharts();
 }
 
@@ -298,7 +439,39 @@ document.querySelectorAll("[data-open-modal]").forEach((button) => {
 document.getElementById("modalClose").addEventListener("click", () => modal.close());
 document.getElementById("modalForm").addEventListener("submit", saveFromModal);
 document.getElementById("sleepForm").addEventListener("submit", calculateSleep);
+document.getElementById("screenTimeForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const app = document.getElementById("screenApp").value.trim();
+  const minutes = Number(document.getElementById("screenMinutes").value);
+  const category = document.getElementById("screenCategory").value;
+  if (!app || Number.isNaN(minutes) || minutes < 0) return;
+  state.screenTime.unshift({ id: Date.now(), app, category, minutes });
+  renderScreenTime();
+  event.target.reset();
+});
 document.getElementById("globalSearch").addEventListener("input", renderNotes);
+
+authForm.addEventListener("submit", handleAuth);
+authModeToggle.addEventListener("click", () => setAuthMode(authMode === "signin" ? "signup" : "signin"));
+
+document.getElementById("logoutButton").addEventListener("click", () => {
+  localStorage.removeItem(storageKeys.session);
+  state.user = null;
+  authScreen.classList.remove("hidden");
+  setAuthMode("signin");
+});
+
+document.getElementById("saveProfileButton").addEventListener("click", () => {
+  const updated = {
+    name: profileName.value.trim() || "LifeOS user",
+    email: profileEmail.value.trim().toLowerCase(),
+  };
+  const accounts = getAccounts().map((account) =>
+    state.user && account.email === state.user.email ? { ...account, ...updated } : account
+  );
+  saveAccounts(accounts);
+  startSession(updated);
+});
 
 document.getElementById("themeToggle").addEventListener("click", () => {
   document.body.classList.toggle("light");
@@ -324,3 +497,4 @@ document.addEventListener("click", (event) => {
 });
 
 renderAll();
+restoreSession();
